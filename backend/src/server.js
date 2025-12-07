@@ -6,16 +6,16 @@ import { connectDB } from './lib/db.js';
 import { ENV } from './lib/env.js';
 import cors from 'cors';
 
-app.use(cors({
-  origin: "https://chatify-1-pwpu.onrender.com", // your frontend URL
-  credentials: true
-}));
 
 const app = express()
 const __dirname = path.resolve();
 
 const PORT = ENV.PORT || 3000;
 
+app.use(cors({
+  origin: "https://chatify-1-pwpu.onrender.com", // your frontend URL
+  credentials: true
+}));
 app.use(express.json())  // req.body
 
 app.use("/api/auth", authRoutes);
