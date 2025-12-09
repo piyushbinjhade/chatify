@@ -7,7 +7,8 @@ import cloudinary from "../lib/cloudinary.js";
 
 
 export const signup = async (req, res) => {
-  const { fullName, email, password } = req.body;
+  const body = req.body || {};
+  const { fullName, email, password } = body;
 
   try {
     if (!fullName || !email || !password) {
