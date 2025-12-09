@@ -6,19 +6,21 @@ import { connectDB } from './lib/db.js';
 import { ENV } from './lib/env.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import arcjetProtection from './middleware/arcjet.middleware.js';
 
 const app = express()
 const __dirname = path.resolve();
-
 const PORT = ENV.PORT || 3000;
+
+app.use(express.json())  // req.body
+app.use(cookieParser())
 
 app.use(cors({
   origin: "https://chatify-1-pwpu.onrender.com", // your frontend URL
   credentials: true
 }));
 
-app.use(express.json())  // req.body
-app.use(cookieParser())
+app.use(arcjetProtection);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
