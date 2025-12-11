@@ -5,6 +5,10 @@ import { ENV } from "../lib/env.js";
 
 export const arcjetProtection = async (req, res, next) => {
     try {
+        if (req.url === "/health" || !req.ip) {
+            return next();
+        }
+        
         const decision = await aj.protect(req);
 
         if(decision.isDenied()) {

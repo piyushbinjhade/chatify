@@ -6,6 +6,8 @@ const MODE = ENV.ARCJET_ENV === "production" ? "LIVE" : "DRY_RUN";
 
 const aj = arcjet({
   key: ENV.ARCJET_KEY,
+  env: ENV.ARCJET_ENV || "production",
+
   rules: [
     // Protection against common vulnerabilities
     shield({ mode: MODE }),
