@@ -16,7 +16,7 @@ app.use(express.json())  // req.body
 app.use(cookieParser())
 
 app.use(cors({
-  origin: "https://chatify-1-pwpu.onrender.com", // your frontend URL
+  origin: ENV.CLIENT_URL, // your frontend URL
   credentials: true
 }));
 
