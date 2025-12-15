@@ -4,16 +4,20 @@ import { axiosInstance } from '../lib/axios.js';
 
 export const useAuthStore = create((set) => ({
     authUser: null,
-    isCheckingauth: true,
-    issigningUp: false,
+    isCheckingAuth: true,
+    isSigningUp: false,
+    isLoggingIn: false,
 
     checkAuth: async () => {
         try {
             const res = await axiosInstance.get('/auth/check');
             set({ authUser: res.data });
         } catch (error) {
-            console.log("Error in authCheck:", error);
-            set({authUser: null});
+            if (error.response?.status === 401) {
+                set({authUser: null});
+            }else{
+                console.log("Error in authCheck:", error);
+            }
         }
         finally{
             set({ isCheckingAuth: false });
@@ -29,9 +33,35 @@ export const useAuthStore = create((set) => ({
             toast.success("Account created successfully!");
 
         } catch (error) {
-            toast.error(error/Response.data.message);
+            toast.error(error.Response.data.message);
         } finally {
             set({ isSigningUp: false });
         }
-    }
+    },
+
+    login: async(data) => {
+        set({ isLoggingIn: true });
+        try {
+            const res = await axiosInstance.post('/auth/login', data);
+            set({ authUser: res.data });
+
+            toast.success("Logged in successfully!");
+
+        } catch (error) {
+            toast.error(error.Response.data.message);
+        } finally {
+            set({ isLoggingIn: false });
+        }
+    },
+
+    logout: async() => {
+        try {
+            await axiosInstance.post('/auth/logout');
+            set({ authUser: null });
+            toast.success("Logged out successfully!");
+        } catch (error) {
+            toast.error("Failed to logout. Please try again.");
+            console.log("Error in logout:", error);
+        }
+    },
 }));
