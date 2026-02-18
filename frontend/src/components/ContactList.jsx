@@ -6,13 +6,13 @@ import { useAuthStore } from "../store/useAuthStore";
 function ContactList() {
   const {
     getAllContacts,
-    allContacts = [], // ✅ ADDED: default empty array (prevents map crash)
+    allContacts = [],
     setSelectedUser,
     isUsersLoading
   } = useChatStore();
 
   const {
-    onlineUsers = [] // ✅ ADDED: default empty array (prevents includes crash)
+    onlineUsers = [] 
   } = useAuthStore();
 
   useEffect(() => {
