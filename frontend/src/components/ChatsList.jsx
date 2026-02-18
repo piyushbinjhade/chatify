@@ -3,15 +3,15 @@ import { useEffect } from "react";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import NoChatsFound from "./NoChatsFound.jsx";
 
-const chatsList = () => {
-  const { getMyChatPartners, Chats, isUsersLoading, setSelectedUser } = useChatStore();
+const ChatsList = () => {
+  const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
 
   useEffect(() => {
     getMyChatPartners();
   }, [getMyChatPartners]);
 
   if(isUsersLoading) return <UsersLoadingSkeleton/>;
-  if(chatsList.length === 0) return <NoChatsFound/>;
+  if(chats.length === 0) return <NoChatsFound/>;
   
     return (
     <>
@@ -36,4 +36,4 @@ const chatsList = () => {
   );
 }
 
-export default chatsList
+export default ChatsList
