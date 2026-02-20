@@ -61,7 +61,7 @@ export const useChatStore = create((set, get) => ({
     const { selectedUser, messages } = get();
     const {authUser} = useAuthStore.getState();
 
-    const tempId = `temp-${date.now()}`;
+    const tempId = `temp-${Date.now()}`;
     const optimisticMessage = {
       _id: tempId,
       sender: authUser._id,
@@ -85,5 +85,13 @@ export const useChatStore = create((set, get) => ({
       set({ messages: messages });
       toast.error(error.response?.data?.message || "Failed to send message");
     }
+  },
+
+  subscribeToMessages: () => {
+    // TODO: Implement socket subscription for real-time messages
+  },
+
+  unsubscribeFromMessages: () => {
+    // TODO: Implement socket unsubscription
   }
 }));

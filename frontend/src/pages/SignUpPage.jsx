@@ -8,7 +8,7 @@ import {
   UserIcon,
   LoaderIcon,
 } from "lucide-react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 
 function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -17,10 +17,14 @@ function SignUpPage() {
     password: "",
   });
   const { signup, isSigningUp } = useAuthStore();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    signup(formData);
+    const success = await signup(formData);
+    if (success) {
+      navigate('/');
+    }
   };
 
   return(
