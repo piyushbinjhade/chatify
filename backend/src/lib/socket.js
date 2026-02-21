@@ -17,20 +17,20 @@ const io = new Server(server, {
 // apply authentication middleware to all socket connections
 io.use(socketAuthMiddleware);
 
-// we will use this function to check if the user is online or not
-export function getReceiverSocketId(userId) {
-  return userSocketMap[userId];
-}
-
 // this is for storig online users
 const userSocketMap = new Map(); // {userId:socketId}
+
+// we will use this function to check if the user is online or not
+export function getReceiverSocketId(userId) {
+  const sockets = userSocketMap.get(userId);
+  return sockets ? [...sockets][0] : null;  // return one socket if multiple
+}
 
 io.on("connection", (socket) => {
   console.log("A user connected", socket.user.fullName);
 
   const userId = socket.userId;
-  const sockets = userSocketMap.get(userId) ?? new 
-  set();
+  const sockets = userSocketMap.get(userId) ?? new Set();
   sockets.add(socket.id);
   userSocketMap.set(userId, sockets);
 
@@ -41,9 +41,13 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.user.fullName);
     const sockets = userSocketMap.get(userId);
-    if(sockets) {
-        sockets.delete(socket.id);
-        if(sockets.size === 0) userSocketMap.delete(userId);
+    if (sockets) {
+      sockets.delete(socket.id);
+      if (sockets.size === 0) {
+        userSocketMap.delete(userId);
+      } else {
+        userSocketMap.set(userId, sockets); 
+      }
     }
     io.emit("getOnlineUsers", Array.from(userSocketMap.keys()));
   });

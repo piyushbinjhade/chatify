@@ -53,9 +53,9 @@ export const useAuthStore = create((set, get) => ({
             set({ authUser: res.data });
 
             toast.success("Logged in successfully!");
-            return true;
-
             get().connectSocket();
+            
+            return true;
         } catch (error) {
             toast.error(error.response.data.message);
             return false;
@@ -90,7 +90,7 @@ export const useAuthStore = create((set, get) => ({
     connectSocket: () => {
         const { authUser } = get();
         const existing = get().socket;
-        if(!authUser || existing?.connected || existing.active) return;
+        if(!authUser || existing?.connected) return;
 
         const socket = io(BASE_URL, {
             withCredentials: true, // this ensures cookies are sent with the connection
@@ -101,6 +101,7 @@ export const useAuthStore = create((set, get) => ({
         set({ socket });
 
         // listen for online users event
+        socket.off("getOnlineUsers");
         socket.on("getOnlineUsers", (userIds) => {
             set({ onlineUsers: userIds });
         });

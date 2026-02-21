@@ -10,25 +10,46 @@ function MessageInput() {
   const [imagePreview, setImagePreview] = useState(null);
 
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null); 
 
   const { sendMessage, isSoundEnabled } = useChatStore();
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
+
     if (isSoundEnabled) playRandomKeyStrokeSound();
 
     sendMessage({
       text: text.trim(),
       image: imagePreview,
     });
+
     setText("");
-    setImagePreview("");
+    setImagePreview(null); 
     if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+  };
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+
+    if (isSoundEnabled) playRandomKeyStrokeSound();
+
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
+    }
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
       return;
@@ -44,8 +65,16 @@ function MessageInput() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(e);
+    }
+  };
+
   return (
-    <div className="p-4 border-t border-slate-700/50">
+    <div className="sticky bottom-0 bg-slate-900 p-4 border-t border-slate-700/50">
+      
       {imagePreview && (
         <div className="max-w-3xl mx-auto mb-3 flex items-center">
           <div className="relative">
@@ -65,16 +94,18 @@ function MessageInput() {
         </div>
       )}
 
-      <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto flex space-x-4">
-        <input
-          type="text"
+      <form
+        onSubmit={handleSendMessage}
+        className="max-w-3xl mx-auto flex items-end gap-3"
+      >
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            isSoundEnabled && playRandomKeyStrokeSound();
-          }}
-          className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-4"
+          onChange={handleTextChange}
+          onKeyDown={handleKeyDown}
           placeholder="Type your message..."
+          className="flex-1 resize-none bg-slate-800/50 border border-slate-700/50 rounded-lg py-1.5 px-4 max-h-40 overflow-y-auto"
         />
 
         <input
@@ -88,12 +119,13 @@ function MessageInput() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 transition-colors ${
+          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 py-2 transition-colors ${
             imagePreview ? "text-cyan-500" : ""
           }`}
         >
           <ImageIcon className="w-5 h-5" />
         </button>
+
         <button
           type="submit"
           disabled={!text.trim() && !imagePreview}
@@ -105,4 +137,5 @@ function MessageInput() {
     </div>
   );
 }
+
 export default MessageInput;
