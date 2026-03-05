@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { axiosInstance } from '../lib/axios.js';
 import { io } from 'socket.io-client';
 
+
 const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
 
 export const useAuthStore = create((set, get) => ({
@@ -65,14 +66,17 @@ export const useAuthStore = create((set, get) => ({
     },
 
     logout: async() => {
+        console.log("logout() called from store");
         try {
             await axiosInstance.post('/auth/logout');
-            set({ authUser: null });
-            toast.success("Logged out successfully!");
-            get().disconnectSocket();
         } catch (error) {
-            toast.error("Failed to logout. Please try again.");
-            console.log("Error in logout:", error);
+            console.log("Logout API error:", error);
+            toast.error("Server error during logout");
+        } finally {
+            // clear state regardless of API result so UI can update
+            set({ authUser: null });
+            get().disconnectSocket();
+            toast.success("Logged out successfully!");
         }
     },
 

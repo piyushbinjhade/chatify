@@ -6,7 +6,10 @@ import { useAuthStore } from "../store/useAuthStore";
 function ChatHeader() {
   const { selectedUser, setSelectedUser } = useChatStore();
   const { onlineUsers } = useAuthStore();
-  const isOnline = selectedUser?._id ? onlineUsers.includes(String(selectedUser._id)) : false;
+
+  const isOnline = selectedUser?._id
+    ? onlineUsers.includes(String(selectedUser._id))
+    : false;
 
   useEffect(() => {
     const handleEscKey = (event) => {
@@ -14,31 +17,53 @@ function ChatHeader() {
     };
 
     window.addEventListener("keydown", handleEscKey);
-
-    // cleanup function
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [setSelectedUser]);
 
   if (!selectedUser) return null;
 
   return (
-    <div className="flex justify-between items-center bg-slate-800/50 border-b border-slate-700/50 max-h-21 px-6 flex-1">
-      <div className="flex items-center space-x-3">
-        <div className={`avatar ${isOnline ? "online" : "offline"}`}>
-          <div className="w-12 rounded-full">
-            <img
-              src={selectedUser.profilePic || "/avatar.png"}
-              alt={selectedUser?.fullName}
-            />
-          </div>
+    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900">
+
+      {/* LEFT SIDE */}
+      <div className="flex items-center gap-4">
+
+        {/* Avatar */}
+        <div className="relative">
+          <img
+            src={selectedUser.profilePic || "/avatar.png"}
+            alt={selectedUser.fullName}
+            className="w-11 h-11 rounded-full object-cover ring-1 ring-slate-700"
+          />
+
+          <span
+            className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${
+              isOnline ? "bg-emerald-500" : "bg-slate-600"
+            }`}
+          />
         </div>
-        <div>
-          <h3 className="text-slate-200 font-medium">{selectedUser?.fullName}</h3>
-          <p className="text-slate-400 text-sm">{isOnline ? "online" : "offline"}</p>
+
+        {/* User Info */}
+        <div className="flex flex-col">
+          <span className="text-slate-200 text-sm font-semibold">
+            {selectedUser.fullName}
+          </span>
+
+          <span className="text-slate-500 text-xs">
+            {isOnline ? "Online" : "Offline"}
+          </span>
         </div>
       </div>
-      <button onClick={() => setSelectedUser(null)}>
-        <X className="w-5 h-5 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer" />
+
+      {/* CLOSE BUTTON */}
+      <button
+        onClick={() => {
+          console.log("close chat button clicked");
+          setSelectedUser(null);
+        }}
+        className="p-2 rounded-lg hover:bg-slate-800 transition"
+      >
+        <X className="w-4 h-4 text-slate-400 hover:text-slate-200 transition" />
       </button>
     </div>
   );

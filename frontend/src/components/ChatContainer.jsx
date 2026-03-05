@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
@@ -12,56 +12,78 @@ function ChatContainer() {
     getMessagesByUserId,
     messages,
     isMessagesLoading,
-    subscribeToMessages,
-    unsubscribeFromMessages,
+    markAsSeen,
   } = useChatStore();
 
-  const { authUser } = useAuthStore();
+  const { authUser, socket } = useAuthStore();
   const messageEndRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     if (!selectedUser?._id) return;
 
     getMessagesByUserId(selectedUser._id);
-    subscribeToMessages();
+    markAsSeen(selectedUser._id);
+    // Global listener is set up in ChatPage, no need to subscribe per-chat
 
-    return () => unsubscribeFromMessages();
+    socket?.on("typing", ({ senderId }) => {
+      if (String(senderId) === String(selectedUser._id)) {
+        setIsTyping(true);
+      }
+    });
+
+    socket?.on("stopTyping", ({ senderId }) => {
+      if (String(senderId) === String(selectedUser._id)) {
+        setIsTyping(false);
+      }
+    });
+
+    return () => {
+      socket?.off("typing");
+      socket?.off("stopTyping");
+    };
   }, [selectedUser?._id]);
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <div className="flex flex-col h-full">
+
       <ChatHeader />
 
-      <div className="flex-1 px-4 lg:px-6 overflow-y-auto py-4">
+      <div
+        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-slate-950"
+        onClick={() => {
+          const ta = document.querySelector("textarea");
+          if (ta) ta.focus();
+        }}
+      >
+
         {authUser && messages.length > 0 && !isMessagesLoading ? (
-          <div className="w-full space-y-3">
+          <>
             {messages.map((msg) => {
-              const isMe =
-                String(msg.senderId) === String(authUser._id);
+              const isMe = String(msg.senderId) === String(authUser._id);
 
               return (
                 <div
                   key={msg._id}
-                  className={`flex ${
-                    isMe ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${isMe ? "justify-end" : "justify-start"} animate-fadeIn`}
                 >
                   <div
-                    className={`relative max-w-[65%] px-4 py-2 rounded-2xl shadow-sm text-sm ${
-                      isMe
-                        ? "bg-cyan-600 text-white"
-                        : "bg-slate-800 text-slate-200"
-                    }`}
+                    className={`relative max-w-[70%] px-4 py-3 rounded-2xl text-sm transition select-none
+                      ${
+                        isMe
+                          ? "bg-cyan-600 text-white rounded-br-md"
+                          : "bg-slate-800 text-slate-200 rounded-bl-md"
+                      }`}
                   >
-                    {msg.image && (
+                    {(msg.image || msg.fileUrl) && (
                       <img
-                        src={msg.image}
+                        src={msg.image || msg.fileUrl}
                         alt="Shared"
-                        className="rounded-lg h-40 object-cover mb-2"
+                        className="rounded-xl mb-2 max-h-60 object-cover"
                       />
                     )}
 
@@ -71,27 +93,57 @@ function ChatContainer() {
                       </p>
                     )}
 
-                    <div className="text-[10px] opacity-70 text-right mt-1">
-                      {new Date(msg.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    {/* timestamp + read receipts*/}
+                    <div
+                      className={`mt-2 text-[10px] flex items-center gap-1 ${
+                        isMe
+                          ? "text-white/70 justify-end"
+                          : "text-slate-400 justify-start"
+                      }`}
+                    >
+                      <span>
+                        {new Date(msg.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+
+                      {isMe && (
+                        <span className={msg.seenAt ? "text-cyan-300" : ""}>
+                          {msg.seenAt ? "✓✓" : msg.deliveredAt ? "✓✓" : "✓"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
               );
             })}
 
-            <div ref={messageEndRef} />
-          </div>
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-slate-800 text-slate-300 px-4 py-3 rounded-2xl rounded-bl-md">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         ) : isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : (
           <NoChatHistoryPlaceholder name={selectedUser.fullName} />
         )}
+
+        <div ref={messageEndRef} />
       </div>
 
-      <MessageInput />
+      <div className="border-t border-slate-800 bg-slate-900">
+        <MessageInput />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
 import { ImageIcon, SendIcon, XIcon } from "lucide-react";
 
@@ -10,9 +11,11 @@ function MessageInput() {
   const [imagePreview, setImagePreview] = useState(null);
 
   const fileInputRef = useRef(null);
-  const textareaRef = useRef(null); 
+  const textareaRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
 
-  const { sendMessage, isSoundEnabled } = useChatStore();
+  const { sendMessage, selectedUser, isSoundEnabled } = useChatStore();
+  const { socket } = useAuthStore();
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -25,19 +28,34 @@ function MessageInput() {
       image: imagePreview,
     });
 
-    setText("");
-    setImagePreview(null); 
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    // Stop typing immediately after send
+    socket?.emit("stopTyping", { receiverId: selectedUser._id });
 
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    setText("");
+    setImagePreview(null);
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
   };
 
   const handleTextChange = (e) => {
-    setText(e.target.value);
+    const value = e.target.value;
+    setText(value);
 
     if (isSoundEnabled) playRandomKeyStrokeSound();
+
+    // Emit typing
+    if (socket && selectedUser?._id) {
+      socket.emit("typing", { receiverId: selectedUser._id });
+
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit("stopTyping", { receiverId: selectedUser._id });
+      }, 1500);
+    }
 
     const el = textareaRef.current;
     if (el) {
@@ -73,15 +91,14 @@ function MessageInput() {
   };
 
   return (
-    <div className="sticky bottom-0 bg-slate-900 p-4 border-t border-slate-700/50">
-      
+    <div className="p-4 border-t border-slate-800 bg-slate-900">
       {imagePreview && (
         <div className="max-w-3xl mx-auto mb-3 flex items-center">
           <div className="relative">
             <img
               src={imagePreview}
               alt="Preview"
-              className="w-20 h-20 object-cover rounded-lg border border-slate-700"
+              className="w-20 h-20 object-cover rounded-xl border border-slate-800"
             />
             <button
               onClick={removeImage}
@@ -104,8 +121,9 @@ function MessageInput() {
           value={text}
           onChange={handleTextChange}
           onKeyDown={handleKeyDown}
-          placeholder="Type your message..."
-          className="flex-1 resize-none bg-slate-800/50 border border-slate-700/50 rounded-lg py-1.5 px-4 max-h-40 overflow-y-auto"
+          placeholder="Type a message..."
+          autoFocus={true}
+          className="flex-1 resize-none bg-slate-800/70 border border-slate-800 rounded-xl py-2 px-4 max-h-40 overflow-y-auto text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-700 transition"
         />
 
         <input
@@ -119,8 +137,8 @@ function MessageInput() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className={`bg-slate-800/50 text-slate-400 hover:text-slate-200 rounded-lg px-4 py-2 transition-colors ${
-            imagePreview ? "text-cyan-500" : ""
+          className={`p-2 rounded-lg hover:bg-slate-800 transition ${
+            imagePreview ? "text-cyan-400" : "text-slate-400 hover:text-slate-200"
           }`}
         >
           <ImageIcon className="w-5 h-5" />
@@ -129,9 +147,9 @@ function MessageInput() {
         <button
           type="submit"
           disabled={!text.trim() && !imagePreview}
-          className="bg-linear-to-r from-cyan-500 to-cyan-600 text-white rounded-lg px-4 py-2 font-medium hover:from-cyan-600 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition disabled:opacity-50"
         >
-          <SendIcon className="w-5 h-5" />
+          <SendIcon className="w-5 h-5 text-white" />
         </button>
       </form>
     </div>
