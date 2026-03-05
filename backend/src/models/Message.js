@@ -12,18 +12,42 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    // Text message
     text: {
       type: String,
       trim: true,
-      maxlength: 2000,
+      maxlength: 5000,
     },
-    image: {
+
+    // Media
+    fileUrl: {
       type: String,
     },
+
+    fileType: {
+      type: String,
+      enum: ["image", "video", "audio", "document"],
+    },
+
+    // Status
+    deliveredAt: Date,
+    seenAt: Date,
+
+    // Edit/Delete
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    isEdited: {
+      type: Boolean,
+      default: false,
+    },
+
+    editedAt: Date,
   },
   { timestamps: true }
 );
 
-const Message = mongoose.model("Message", messageSchema);
-
-export default Message;
+export default mongoose.model("Message", messageSchema);

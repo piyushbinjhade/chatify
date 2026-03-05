@@ -1,75 +1,81 @@
 import User from "../models/User.js";
 import { generateToken } from "../lib/utils.js";
 import bcrypt from "bcrypt";
-import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import { ENV } from "../lib/env.js";
 import cloudinary from "../lib/cloudinary.js";
-
+import crypto from "crypto";
+import { sendResetEmail } from "../lib/mail.js";
 
 export const signup = async (req, res) => {
-  const body = req.body || {};
-  const { fullName, email, password } = body;
+  const { fullName, email, username, password } = req.body;
 
   try {
-    if (!fullName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-    if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 6 characters long" });
+    if (!fullName || !email || !username || !password) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
 
-    // check if emails valid: regex
+    if (username.length < 3 || username.length > 20) {
+      return res.status(400).json({
+        message: "Username must be 3–20 characters",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res
-        .status(400)
-        .json({ message: "Please enter a valid email address" });
-    }
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ message: "Email is already registered" });
+      return res.status(400).json({
+        message: "Invalid email format",
+      });
     }
 
-    // hash password
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({
+        message: "Email already registered",
+      });
+    }
+
+    const existingUsername = await User.findOne({
+      username: username.toLowerCase(),
+    });
+    if (existingUsername) {
+      return res.status(400).json({
+        message: "Username already taken",
+      });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const newUser = new User({
+
+    const newUser = await User.create({
       fullName,
-      email,
+      email: email.toLowerCase(),
+      username: username.toLowerCase(),
       password: hashedPassword,
     });
 
-    if (newUser) {
-      // generateToken(newUser._id,res);
-      // await newUser.save();
+    generateToken(newUser._id, res);
 
-      // Persist user first, then issue auth cookie
-      const savedUser = await newUser.save();
-      generateToken(savedUser._id, res);
+    res.status(201).json({
+      _id: newUser._id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      username: newUser.username,
+      profilePic: newUser.profilePic,
+    });
 
-      res.status(201).json({
-        _id: newUser._id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-      });
-      try {
-        await sendWelcomeEmail(
-          savedUser.email,
-          savedUser.fullName,
-          ENV.CLIENT_URL
-        );
-      } catch (error) {
-        console.log("Failed to send welcome email:", error);
-      }
-    } else {
-      res.status(400).json({ message: " Invalid user data" });
-    }
   } catch (error) {
-    console.log("Error in signup controller:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Signup error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
@@ -130,4 +136,78 @@ export const updateProfile = async (req, res) => {
     console.log("Error in update profile:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email)
+    return res.status(400).json({ message: "Email is required" });
+
+  const user = await User.findOne({ email });
+
+  if (!user)
+    return res.status(200).json({
+      message: "If email exists, reset link sent",
+    });
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  user.resetPasswordToken = hashedToken;
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+
+  await user.save();
+
+  const resetLink = `${ENV.CLIENT_URL}/reset-password/${resetToken}`;
+
+  console.log("Sending reset email to:", user.email);
+
+  await sendResetEmail(user.email, resetLink);
+
+
+  res.status(200).json({
+    message: "If email exists, reset link sent",
+  });
+};
+
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!password || password.length < 6)
+    return res.status(400).json({
+      message: "Password must be at least 6 characters",
+    });
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user)
+    return res.status(400).json({
+      message: "Invalid or expired token",
+    });
+
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(password, salt);
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  res.status(200).json({
+    message: "Password reset successful",
+  });
+};
