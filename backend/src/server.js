@@ -1,5 +1,7 @@
 import express from "express";
 import path from "path";
+import { fileURLToPath } from "url";
+
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -12,7 +14,9 @@ import { ENV } from "./lib/env.js";
 import arcjetProtection from "./middleware/arcjet.middleware.js";
 import { app, server } from "./lib/socket.js";
 
-const __dirname = path.resolve();
+// const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const PORT = ENV.PORT || 3000;
 
 app.use(
@@ -38,6 +42,13 @@ app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
+const frontendPath = path.join(__dirname, "../frontend/dist");
+
+app.use(express.static(frontendPath));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(frontendPath, "index.html"));
+});
 
 server.listen(PORT, () => {
   console.log("Server running on port : " + PORT);
