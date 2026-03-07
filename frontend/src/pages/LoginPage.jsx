@@ -73,9 +73,9 @@ function LoginPage() {
                       />
                     </div>
                     <div className="text-right mb-3">
-                      <a href="/forgot-password" className="text-sm link">
+                      <Link to="/forgot-password" className="text-sm link">
                         Forgot Password?
-                      </a>
+                      </Link>
                     </div>
                   </div>
 

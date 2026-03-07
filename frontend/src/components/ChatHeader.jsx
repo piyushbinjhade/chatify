@@ -58,7 +58,6 @@ function ChatHeader() {
       {/* CLOSE BUTTON */}
       <button
         onClick={() => {
-          console.log("close chat button clicked");
           setSelectedUser(null);
         }}
         className="p-2 rounded-lg hover:bg-slate-800 transition"
