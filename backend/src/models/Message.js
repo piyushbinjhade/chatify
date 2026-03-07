@@ -50,4 +50,9 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes for query optimization
+messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
+messageSchema.index({ senderId: 1, createdAt: -1 });
+messageSchema.index({ receiverId: 1, createdAt: -1 });
+
 export default mongoose.model("Message", messageSchema);
