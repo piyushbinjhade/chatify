@@ -75,7 +75,7 @@ function ChatContainer() {
                     className={`relative max-w-[70%] px-4 py-3 rounded-2xl text-sm transition select-none
                       ${
                         isMe
-                          ? "bg-cyan-600 text-white rounded-br-md"
+                          ? "bg-cyan-900 text-white rounded-br-md"
                           : "bg-slate-800 text-slate-200 rounded-bl-md"
                       }`}
                   >

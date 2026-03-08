@@ -18,12 +18,12 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 bg-slate-900">
-      <div className="relative w-full max-w-6xl md:h-200 h-162.5">
+    <div className="w-full flex items-center justify-center p-4 bg-slate-900 min-h-screen">
+      <div className="relative w-full max-w-6xl md:h-200 min-h-screen md:min-h-fit">
         <BorderAnimatedContainer>
           <div className="w-full flex flex-col md:flex-row">
             {/* FORM CLOUMN - LEFT SIDE */}
-            <div className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30">
+            <div className="md:w-1/2 p-4 md:p-8 flex items-center justify-center md:border-r border-slate-600/30">
               <div className="w-full max-w-md">
                 {/* HEADING TEXT */}
                 <div className="text-center mb-8">
@@ -73,7 +73,7 @@ function LoginPage() {
                       />
                     </div>
                     <div className="text-right mb-3">
-                      <Link to="/forgot-password" className="text-sm link">
+                      <Link to="/forgot-password" className="text-sm text-slate-300 hover:text-cyan-400 transition-colors">
                         Forgot Password?
                       </Link>
                     </div>

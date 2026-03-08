@@ -2,6 +2,7 @@ import cloudinary from "../lib/cloudinary.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import mongoose from "mongoose";
 
   //  GET MESSAGES (FRIEND PROTECTED)
 export const getMessageByUserId = async (req, res) => {
@@ -132,7 +133,7 @@ export const markMessagesAsSeen = async (req, res) => {
   //  GET RECENT CHAT PARTNERS (FRIEND FILTERED)
 export const getChatPartners = async (req, res) => {
   try {
-    const myId = req.user._id;
+    const myId = new mongoose.Types.ObjectId(req.user._id);
 
     const me = await User.findById(myId).select("friends");
 

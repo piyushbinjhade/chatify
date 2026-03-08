@@ -35,7 +35,43 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
     </Routes>
-    <Toaster/>
+    <Toaster
+      position="top-center"
+      reverseOrder={false}
+      gutter={8}
+      toastOptions={{
+        duration: 4000,
+        style: {
+          background: '#1e293b',
+          color: '#e2e8f0',
+          fontSize: '16px',
+          padding: '16px',
+          borderRadius: '8px',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          minWidth: '200px',
+        },
+        success: {
+          style: {
+            background: '#10b981',
+            color: '#ffffff',
+          },
+          iconTheme: {
+            primary: '#ffffff',
+            secondary: '#10b981',
+          },
+        },
+        error: {
+          style: {
+            background: '#7f1d1d',
+            color: '#fca5a5',
+          },
+          iconTheme: {
+            primary: '#fca5a5',
+            secondary: '#1e293b',
+          },
+        },
+      }}
+    />
     </div>
   );
 }

@@ -99,9 +99,15 @@ export const useAuthStore = create((set, get) => ({
 
         const socket = io(BASE_URL, {
             withCredentials: true, // this ensures cookies are sent with the connection
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            reconnectionAttempts: 5,
         });
 
-        socket.connect();
+        socket.on("connect_error", (error) => {
+            console.error("Socket connection error:", error);
+        });
 
         set({ socket });
 

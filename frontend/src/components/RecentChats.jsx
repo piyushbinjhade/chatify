@@ -10,7 +10,7 @@ function RecentChats() {
     getRecentChats();
   }, []);
 
-  if (!chats.length) return null;
+  if (!chats || !chats.length) return null;
 
   return (
     <div>
@@ -19,7 +19,7 @@ function RecentChats() {
       </h3>
 
       <div className="space-y-1">
-        {chats.map((chat) => {
+        {(Array.isArray(chats) ? chats : []).map((chat) => {
           const user = chat._id;
           const isSelected = selectedUser?._id === user._id;
           const isOnline = onlineUsers.includes(user._id);

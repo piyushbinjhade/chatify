@@ -38,13 +38,13 @@ function UserSearch() {
       {/* Search Results */}
       {query && (
         <div className="space-y-2">
-          {searchResults.length === 0 && !isSearching && (
+          {(!Array.isArray(searchResults) || searchResults.length === 0) && !isSearching && (
             <p className="text-slate-500 text-sm text-center py-4">
               No users found
             </p>
           )}
 
-          {searchResults.map((user) => (
+          {(Array.isArray(searchResults) ? searchResults : []).map((user) => (
             <div
               key={user._id}
               className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-all duration-200"

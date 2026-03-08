@@ -95,16 +95,16 @@ export const useFriendStore = create((set, get) => ({
 
   // GET FRIENDS
   getFriends: async () => {
-    set({ isLoadingFriends: true });
-
-    try {
-      const res = await axiosInstance.get("/friends/list");
-      set({ friends: res.data });
-    } catch (error) {
-      toast.error("Failed to load friends");
-    } finally {
-      set({ isLoadingFriends: false });
-    }
-  },
+  set({ isLoadingFriends: true });
+  try {
+    const res = await axiosInstance.get("/friends/list");
+    set({ friends: Array.isArray(res.data) ? res.data : [] });
+  } catch (error) {
+    set({ friends: [] });
+    toast.error("Failed to load friends");
+  } finally {
+    set({ isLoadingFriends: false });
+  }
+},
   
 }));

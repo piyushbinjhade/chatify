@@ -27,26 +27,24 @@ function FriendRequests() {
         </div>
       )}
 
-      {!isLoadingRequests && pendingRequests.length === 0 && (
+      {!isLoadingRequests && (!Array.isArray(pendingRequests) || pendingRequests.length === 0) && (
         <p className="text-slate-500 text-sm text-center py-6">
           No pending requests
         </p>
       )}
 
       <div className="space-y-3">
-        {pendingRequests.map((req) => (
+        {(Array.isArray(pendingRequests) ? pendingRequests : []).map((req) => (
           <div
             key={req._id}
             className="flex items-center justify-between px-3 py-3 rounded-xl bg-slate-800/60 hover:bg-slate-800 transition-all duration-200"
           >
-            {/* User Info */}
             <div className="flex items-center gap-3 overflow-hidden">
               <img
                 src={req.sender.profilePic || "/avatar.png"}
                 alt="avatar"
                 className="w-10 h-10 rounded-full object-cover"
               />
-
               <div className="flex flex-col overflow-hidden">
                 <span className="text-slate-200 text-sm font-medium truncate">
                   {req.sender.fullName}
@@ -57,15 +55,13 @@ function FriendRequests() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-2">
               <button
                 onClick={() => acceptRequest(req._id)}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600/80 hover:bg-emerald-600 transition"
+                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-700 hover:bg-emerald-800 transition"
               >
                 Accept
               </button>
-
               <button
                 onClick={() => rejectRequest(req._id)}
                 className="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-700 hover:bg-slate-600 transition"

@@ -36,12 +36,12 @@ function SignUpPage() {
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 bg-slate-900">
-      <div className="relative w-full max-w-6xl md:h-200 h-162.5">
+    <div className="w-full flex items-center justify-center p-4 bg-slate-900 min-h-screen">
+      <div className="relative w-full max-w-6xl md:h-200 min-h-screen md:min-h-fit">
         <BorderAnimatedContainer>
           <div className="w-full flex flex-col md:flex-row">
             {/* LEFT SIDE */}
-            <div className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30">
+            <div className="md:w-1/2 p-4 md:p-8 flex items-center justify-center md:border-r border-slate-600/30">
               <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                   <MessageCircleIcon className="w-12 h-12 mx-auto text-slate-400 mb-4" />
