@@ -54,7 +54,7 @@ function ChatContainer() {
       <ChatHeader />
 
       <div
-        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-slate-950"
+        className="flex-1 overflow-y-auto px-4 md:px-6 py-4 md:py-6 space-y-4 bg-slate-950 min-h-0"
         onClick={() => {
           const ta = document.querySelector("textarea");
           if (ta) ta.focus();

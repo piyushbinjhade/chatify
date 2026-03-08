@@ -23,13 +23,13 @@ function ChatHeader() {
   if (!selectedUser) return null;
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900">
+    <div className="flex shrink-0 z-10 items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900">
 
       {/* LEFT SIDE */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-1 min-w-0 mr-4">
 
         {/* Avatar */}
-        <div className="relative">
+        <div className="relative shrink-0">
           <img
             src={selectedUser.profilePic || "/avatar.png"}
             alt={selectedUser.fullName}
@@ -44,8 +44,8 @@ function ChatHeader() {
         </div>
 
         {/* User Info */}
-        <div className="flex flex-col">
-          <span className="text-slate-200 text-sm font-semibold">
+        <div className="flex flex-col flex-1 min-w-0">
+          <span className="text-slate-200 text-sm font-semibold truncate">
             {selectedUser.fullName}
           </span>
 

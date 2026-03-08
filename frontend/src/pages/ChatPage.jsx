@@ -27,8 +27,8 @@ function ChatPage() {
   }, [socket?.connected, setupGlobalMessageListener]);
 
   return (
-    <div className="h-screen w-full bg-slate-950 flex items-center justify-center p-2 md:p-4">
-      <div className="w-full max-w-7xl h-[95vh] flex flex-col md:flex-row rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+    <div className="h-[100dvh] w-full bg-slate-950 flex items-center justify-center p-0 md:p-4">
+      <div className="w-full max-w-7xl h-full md:h-[95vh] flex flex-col md:flex-row md:rounded-2xl overflow-hidden border-0 md:border border-slate-800 md:shadow-2xl">
         {/* LEFT SIDEBAR */}
         <div className="hidden md:flex md:w-80 bg-slate-900 flex-col border-r border-slate-800">
           {/* Profile */}
@@ -54,7 +54,7 @@ function ChatPage() {
         </div>
 
         {/* RIGHT CHAT AREA */}
-        <div className="flex-1 bg-slate-950 flex flex-col w-full">
+        <div className="flex-1 bg-slate-950 flex flex-col w-full min-h-0 overflow-hidden">
           {selectedUser ? (
             <ChatContainer />
           ) : (
@@ -65,8 +65,8 @@ function ChatPage() {
               </div>
               
               {/* MOBILE: Show sidebar content */}
-              <div className="flex-1 flex flex-col md:hidden items-center justify-center">
-                <div className="w-full h-full flex flex-col bg-slate-900">
+              <div className="flex-1 flex flex-col md:hidden min-h-0">
+                <div className="w-full h-full flex flex-col bg-slate-900 min-h-0">
                   <div className="px-4 py-4 border-b border-slate-800">
                     <ProfileHeader />
                   </div>
