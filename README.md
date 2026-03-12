@@ -5,6 +5,7 @@ A real-time chat application built with the MERN stack (MongoDB, Express, React,
 ## Features
 - **Real-time Messaging**: Instant communication powered by Socket.io
 - **User Authentication**: Secure login and authorization using JWT & Bcrypt
+- **Forgot Password**: Password recovery system with secure token hashing and email delivery
 - **Image Sharing**: Seamless media uploads via Cloudinary
 - **Modern UI**: Sleek, responsive design built with React, Tailwind CSS (v4), and DaisyUI
 - **State Management**: Efficient and localized state handling using Zustand
